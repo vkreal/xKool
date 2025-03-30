@@ -1,6 +1,7 @@
 // Requiring module
 const express = require('express');
 const axios = require('axios');
+const {JSDOM} = require('jsdom');
 
 
 // Creating express object
@@ -9,8 +10,9 @@ const app = express();
 // Handling GET request
 app.get('/', async (req, res) => { 
     let string_html = await fetchGoogle();
-    let new_html = replaceRelativeCSS(string_html, 'https://www.google.com');
-    res.send(new_html) 
+    const dom = new JSDOM(string_html);
+    const document = dom.window.document;
+    res.send(string_html) 
     res.end() 
 });
 
