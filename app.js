@@ -25,7 +25,8 @@ app.get('/', async (req, res) => {
     const script_tags =  document.getElementsByTagName('script');
     for(let i=0; i<script_tags.length; i++) {
         if(script_tags[i].src.indexOf(url) === -1) {
-            script_tags[i].src = url + script_tags[i].src;
+            // script_tags[i].src = url + script_tags[i].src;
+            console.log(script_tags[i].src);
         }
     }
 
