@@ -13,13 +13,21 @@ app.get('/', async (req, res) => {
     const dom = new JSDOM(string_html);
     const document = dom.window.document;
 
-    const src =  'https://www.google.com' + document.getElementsByTagName('img')[0].src;
+    const url = "https://www.google.com";
 
-    if(src.indexOf('google.com') === -1) {
-        // doesnt exist in the string
+    const imgs_tags =  document.getElementsByTagName('img');
+    for(let i=0; i<imgs_tags.length; i++) {
+        if(imgs_tags[i].src.indexOf(url) === -1) {
+            // doesnt exist in the string
+            imgs_tags[i].src = url + imgs_tags[i].src;
+        }
     }
-
-    document.getElementsByTagName('img')[0].src = src;
+    const script_tags =  document.getElementsByTagName('script');
+    for(let i=0; i<script_tags.length; i++) {
+        if(script_tags[i].src.indexOf(url) === -1) {
+            script_tags[i].src = url + script_tags[i].src;
+        }
+    }
 
     res.send(dom.serialize()) 
     res.end() 
