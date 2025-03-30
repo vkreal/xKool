@@ -9,7 +9,8 @@ const app = express();
 // Handling GET request
 app.get('/', async (req, res) => { 
     let string_html = await fetchGoogle();
-    res.send(string_html) 
+    let new_html = replaceRelativeCSS(string_html, 'https://www.google.com');
+    res.send(new_html) 
     res.end() 
 });
 
@@ -34,9 +35,28 @@ app.listen(PORT,console.log(
 
 async function fetchGoogle() {
     try {
-        const response = await axios.get('https://www.google.com');
+        const response = await axios.get('https://www.google.com/');
         return response.data;
     } catch (error) {
         console.error('Error:', error.message);
     }
+}
+
+function replaceRelativeCSS(html, baseUrl) {
+    // Replace <link> href attributes
+    html = html.replace(/<link\s+[^>]*href=["'](\/[^"']*)["']/gi, (match, path) => {
+        return match.replace(path, baseUrl + path);
+    });
+
+    // Replace @import in <style> tags
+    html = html.replace(/@import\s+url\(["']?(\/[^"'\)]*)["']?\)/gi, (match, path) => {
+        return match.replace(path, baseUrl + path);
+    });
+
+    // Replace url() inside <style> or inline styles
+    html = html.replace(/url\(["']?(\/[^"'\)]*)["']?\)/gi, (match, path) => {
+        return match.replace(path, baseUrl + path);
+    });
+
+    return html;
 }
