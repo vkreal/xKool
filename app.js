@@ -8,8 +8,8 @@ const app = express();
 
 // Handling GET request
 app.get('/', async (req, res) => { 
-    let test = await fetchGoogle();
-    res.send(test) 
+    let string_html = await fetchGoogle();
+    res.send(string_html) 
     res.end() 
 });
 
