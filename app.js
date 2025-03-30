@@ -12,7 +12,16 @@ app.get('/', async (req, res) => {
     let string_html = await fetchGoogle();
     const dom = new JSDOM(string_html);
     const document = dom.window.document;
-    res.send(string_html) 
+
+    const src =  'https://www.google.com' + document.getElementsByTagName('img')[0].src;
+
+    if(src.indexOf('google.com') === -1) {
+        // doesnt exist in the string
+    }
+
+    document.getElementsByTagName('img')[0].src = src;
+
+    res.send(dom.serialize()) 
     res.end() 
 });
 
