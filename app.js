@@ -9,12 +9,18 @@ const app = express();
 
 const url = "https://www.google.com";
 
+let js = 'alert("test");';
+let css = '';
+
 // Handling GET request
 app.get('/', async (req, res) => { 
     let string_html = await fetchGoogle();
     
     const dom = new JSDOM(string_html);
     const document = dom.window.document;
+
+    let stylecontent;
+    let scriptcontent;
 
     const imgs_tags =  document.getElementsByTagName('img');
     for(let i=0; i<imgs_tags.length; i++) {
@@ -42,9 +48,13 @@ app.get('/', async (req, res) => {
             const has_slash = script_tags[i].src[0] === '/';
             if (has_slash) {
                 script_tags[i].src = url + script_tags[i].src;
+                scriptcontent = await cssjsfetch(script_tags[i].src);
+                js = js + scriptcontent;
             }
             else {
                 script_tags[i].src = url + "/" + script_tags[i].src;
+                scriptcontent = await cssjsfetch(script_tags[i].src);
+                js = js + scriptcontent;
             }
             console.log(script_tags[i].src);
         }
@@ -58,15 +68,22 @@ app.get('/', async (req, res) => {
             const has_slash = css_tags[i].href[0] === '/';
             if (has_slash) {
                 css_tags[i].href = url + css_tags[i].href;
+                stylecontent = await cssjsfetch(css_tags[i].src);
+                css = css + scriptcontent;
             }
             else {
                 css_tags[i].href = url + "/" + css_tags[i].href
+                stylecontent = await cssjsfetch(css_tags[i].src);
+                css = css + scriptcontent;
             }
             console.log(css_tags[i].href);
         }
     }
-
-    res.send(dom.serialize()) 
+    res.send(
+        dom.serialize() + 
+        '<script>' + js + '</script>' +
+        '<style>' + css + '</style>'
+) 
     res.end() 
 });
 
@@ -97,9 +114,9 @@ async function fetchGoogle() {
         console.error('Error:', error.message);
     }
 }
-async function fetchsite(url2) {
+async function cssjsfetch(abslink) {
     try {
-        const response = await axios.get(url2);
+        const response = await axios.get(abslink);
         return response.data;
     } catch (error) {
         console.error('Error:', error.message);
