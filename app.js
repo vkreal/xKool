@@ -10,6 +10,7 @@ const app = express();
 // Handling GET request
 app.get('/', async (req, res) => { 
     let string_html = await fetchGoogle();
+    
     const dom = new JSDOM(string_html);
     const document = dom.window.document;
 
@@ -18,15 +19,23 @@ app.get('/', async (req, res) => {
     const imgs_tags =  document.getElementsByTagName('img');
     for(let i=0; i<imgs_tags.length; i++) {
         if(imgs_tags[i].src.indexOf(url) === -1) {
-            // doesnt exist in the string
             imgs_tags[i].src = url + imgs_tags[i].src;
+            console.log(imgs_tags[i].src);
         }
     }
    
     const script_tags =  document.getElementsByTagName('script');
     for(let i=0; i<script_tags.length; i++) {
-        if(script_tags[i].src.indexOf(url) === -1) {
+        if(script_tags[i].src.indexOf(url) === -1 && script_tags[i].src !== "") {
+            script_tags[i].src = url + script_tags[i].src;
             console.log(script_tags[i].src);
+        }
+    }
+    const css_tags = document.getElementsByTagName('link');
+    for(let i=0; i<css_tags.length; i++) {
+        if(css_tags[i].href.indexOf(url) === -1 && css_tags[i].href !== "") {
+            css_tags[i].href = url + css_tags[i].href;
+            console.log(css_tags[i].href);
         }
     }
 
@@ -55,28 +64,9 @@ app.listen(PORT,console.log(
 
 async function fetchGoogle() {
     try {
-        const response = await axios.get('https://www.google.com/');
+        const response = await axios.get("https://www.google.com/");
         return response.data;
     } catch (error) {
         console.error('Error:', error.message);
     }
-}
-
-function replaceRelativeCSS(html, baseUrl) {
-    // Replace <link> href attributes
-    html = html.replace(/<link\s+[^>]*href=["'](\/[^"']*)["']/gi, (match, path) => {
-        return match.replace(path, baseUrl + path);
-    });
-
-    // Replace @import in <style> tags
-    html = html.replace(/@import\s+url\(["']?(\/[^"'\)]*)["']?\)/gi, (match, path) => {
-        return match.replace(path, baseUrl + path);
-    });
-
-    // Replace url() inside <style> or inline styles
-    html = html.replace(/url\(["']?(\/[^"'\)]*)["']?\)/gi, (match, path) => {
-        return match.replace(path, baseUrl + path);
-    });
-
-    return html;
 }
